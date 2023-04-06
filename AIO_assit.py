@@ -41,27 +41,27 @@ def wishMe():
     hour = int(datetime.datetime.now().hour)
     
     if hour>=4 and hour< 12:
-        speak("Good Morning brother")
+        speak("Good Morning sir")
     elif hour>= 12 and hour< 18:
-        speak("Good Afternoon brother")
+        speak("Good Afternoon sir")
     elif hour>= 18 and hour< 20:
-        speak("Good Evening brother")    
+        speak("Good Evening sir")    
     else:
-        speak("Good Night brother")
+        speak("Good Night sir")
         
-    speak(f"I am Sanchay. How may I assist you ?")
+    speak(f"I am echo. How may I assist you ?")
     
 def takeCommand():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
-        r.pause_threshold = 1
+        r.pause_threshold = 1.3
         audio = r.listen(source)
         
     try: 
         print("Recognising...")
         query = r.recognize_google(audio, language='en-in') 
-        print(f"user said: {query}\n")
+        print(f"You said: {query}\n")
         
     except Exception as e:
         print("Sorry, I could not understand. Could you please say that again?")  
@@ -79,11 +79,11 @@ if __name__ == "__main__":
         query = takeCommand().lower()
         
         if 'stop now' in query or 'stop it' in query:
-            speak("Okay brother")
+            speak("Okay sir")
             break
         
         elif 'tell me something about' in query:
-            speak("Okay brother, I'm working on it.")
+            speak("Okay sir, I'm working on it.")
             speak("Showing results.........")
             query = query.replace("tell me something about", "")
             results = wikipedia.summary(query, sentences=2)
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             webbrowser.open('https://www.youtube.com/') 
                
         elif 'open google' in query:
-            speak("Just a second brother.")
+            speak("Just a second sir.")
             speak("Opening google")
             webbrowser.open('https://www.google.com/')
             
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             codePath = "C:\\Program Files\\MATLAB\\R2022b\\bin\\matlab.exe"   
             os.startfile(codePath) 
 
-        elif 'search' in query or 'play' in query:
+        elif 'search' in query or 'play' in query or 'find' in query:
              
             query = query.replace("search", "")
             query = query.replace("play", "")         
@@ -135,9 +135,9 @@ if __name__ == "__main__":
             speak("Background changed successfully")
            
         elif "what's your name" in query or "What is your name" in query:
-            speak("My brother call me")
-            speak("Sanchay")
-            print("My bhai call me Sanchay")
+            speak("My sir call me")
+            speak("echo")
+            print("My master call me echo")
 
         elif "who made you" in query or "who created you" in query:
             speak("I have been created by Panda and a hamster.")
@@ -148,10 +148,10 @@ if __name__ == "__main__":
             os.startfile(codePath)
 
         elif "write a note" in query:
-            speak("What should i write, brother")
+            speak("What should i write, sir")
             note = takeCommand()
-            file = open('bhai.txt', 'w')
-            speak("bhai, Should i include date and time")
+            file = open('master.txt', 'w')
+            speak("master, Should i include date and time")
             snfm = takeCommand()
             if 'yes' in snfm or 'sure' in snfm:
                 strTime = datetime.datetime.now().strftime("%H:%M:%S")
@@ -161,23 +161,23 @@ if __name__ == "__main__":
             else:
                 file.write(note)
          
-        elif "show note" in query:
+        elif "show notes" in query:
             speak("Showing Notes")
-            file = open("bhai.txt", "r")
+            file = open("master.txt", "r")
             print(file.read())
             t=file.read()
             speak(t)
         
         elif 'open camera' in query:
-            speak("Cool, I'm on it brother.")
+            speak("Cool, I'm on it sir.")
             open_camera()
 
         elif 'open notepad' in query:
-            speak("Cool, I'm on it brother.")
+            speak("Cool, I'm on it sir.")
             open_notepad()
 
         elif 'open calculator' in query:
-            speak("Cool, I'm on it brother.")
+            speak("Cool, I'm on it sir.")
             open_calculator() 
 
         elif "who i am" in query:
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             speak("Thanks to panda and hamster. further It's a secret")
 
         elif 'open cmd' in query:
-            speak("Cool, I'm on it brother.")
+            speak("Cool, I'm on it sir.")
             open_cmd()
         
         elif "where is" in query:
@@ -198,15 +198,24 @@ if __name__ == "__main__":
             webbrowser.open("https://www.google.com/maps/place/" + location + "")
 
         elif 'open my linkedin profile' in query:
-            speak("Just a second brother.")
+            speak("Just a second sir.")
             speak("Opening linkedin")
             webbrowser.open('https://www.linkedin.com/in/sanyam-gupta-7b7624258/')
 
         elif 'open my github profile' in query:
-            speak("Just a second brother.")
+            speak("Just a second sir.")
             speak("Opening github")
             webbrowser.open('https://github.com/mehisanyam/codeit')
-            
+
+        
+        elif 'speak what i write' in query:
+            speak("Okay, go on")
+            while True:
+                inp=input("SAY: ")
+                speak(inp)
+                if (inp=="stop now"):
+                    speak("Okay sir")
+                    break
                 
                     
             
