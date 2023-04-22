@@ -5,14 +5,29 @@ import wikipedia
 import webbrowser
 import os
 import datetime
-import os
+import smtplib
 import subprocess as sp
 import ctypes
+import wolframalpha
+import tkinter
+import pyjokes
+from twilio.rest import Client
+from ecapture import ecapture as ec
+from bs4 import BeautifulSoup
+import win32com.client as wincl
+from urllib.request import urlopen
+import requests
+import json
+import openai
+import calendar
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 
 engine.setProperty('voice' , voices[1].id)
+
+openai.api_key = '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'
+messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 def speak(audio):
     
@@ -29,6 +44,16 @@ def open_camera():
 
 def open_calculator():
     sp.Popen(paths['calculator'])
+
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+     
+    # Enable low security in gmail
+    server.login('your email id', 'your email password')
+    server.sendmail('your email id', to, content)
+    server.close()
 
 def open_notepad():
     sp.Popen(paths['notepad'])
@@ -77,13 +102,15 @@ if __name__ == "__main__":
                 break
         
             elif 'tell me something about' in query:
-                speak("Okay sir, I'm working on it.")
+                speak("Ok sir")
                 speak("Showing results.........")
                 query = query.replace("tell me something about", "")
-                results = wikipedia.summary(query, sentences=2)
+                results = wikipedia.summary(query, sentences=3)
                 speak("According to Wikipedia")
                 print(results)
                 speak(results)
+
+            
             
             elif 'what is the time' in query:
                 strTime = datetime.datetime.now().strftime("%H:%M:%S")    
@@ -92,14 +119,106 @@ if __name__ == "__main__":
             elif 'open youtube' in query:
                 speak("Opening youtube")
                 webbrowser.open('https://www.youtube.com/') 
+
+            elif "take" in query:
+                ec.capture(0, "sophie Camera ", "img.jpg")
                
             elif 'open google' in query:
                 speak("cool, opening google")
                 webbrowser.open('https://www.google.com/')
+
+            elif 'email to sanchay' in query:
+                try:
+                    speak("What should I say?")
+                    content = takeCommand()
+                    to = "san72.kumar@gmail.com"   
+                    sendEmail(to, content)
+                    speak("Email has been sent !")
+                except Exception as e:
+                    print(e)
+                    speak("I am not able to send this email")
+                
+            elif 'news' in query:
+             
+                try:
+                    query_params = {
+                        "source": "bbc-news",
+                        "sortBy": "top",
+                        "apiKey": "feb3fa7ed27c4836b9dbdbdfcf2de905"
+                    }
+                    main_url = " https://newsapi.org/v1/articles"
+ 
+    # fetching data in json format
+                    res = requests.get(main_url, params=query_params)
+                    open_bbc_page = res.json()
+                     
+                        # getting all articles in a string article
+                    article = open_bbc_page["articles"]
+                     
+                        # empty list which will
+                        # contain all trending news
+                    results = []
+                         
+                    for ar in article:
+                        results.append(ar["title"])
+                             
+                    for i in range(len(results)):
+                             
+                            # printing all trending news
+                        print(i + 1, results[i])
+                     
+                        #to read the news out loud for us
+                    from win32com.client import Dispatch
+                    speak = Dispatch("SAPI.Spvoice")
+                    speak.Speak(results)
+                except Exception as e:
+                 
+                    print(str(e))
+ 
+            elif 'send a mail' in query:
+                try:
+                    speak("What should I say?")
+                    content = takeCommand()
+                    speak("whome should i send")
+                    to = input()   
+                    sendEmail(to, content)
+                    speak("Email has been sent !")
+                except Exception as e:
+                    print(e)
+                    speak("I am not able to send this email")
+
+            elif 'joke' in query:
+                speak(pyjokes.get_joke())
+
+            elif 'show me the calendar of year' in query:
             
-            elif 'open chat' in query:
-                speak("opening ChatGPT")
-                webbrowser.open('https://chat.openai.com/chat')  
+                query = query.replace("show me the calendar of year", "")
+                print (f"The calendar of year {query} is : ")
+                speak('Loading calendar of year')
+                print (calendar.calendar(query))
+             
+            elif "calculate" in query:
+             
+                app_id = "XQG6QJ-28EW8E75RR"
+                client = wolframalpha.Client(app_id)
+                indx = query.lower().split().index('calculate')
+                query = query.split()[indx + 1:]
+                res = client.query(' '.join(query))
+                answer = next(res.results).text
+                print("The answer is " + answer)
+                speak("The answer is " + answer)
+            
+            elif 'chat gpt' in query:
+                
+                speak("connecting you to Open- a i")
+                while True:
+	                if message:
+                        
+		                messages.append({"role": "user", "content": message},)
+		                chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages) 
+	                reply = chat.choices[0].message.content
+	                print(f"ChatGPT: {reply}")
+	                messages.append({"role": "assistant", "content": reply})
 
             elif 'lock windows' in query or "lock my pc" in query or "lock the device" in query:
                 speak("locking the device master")
@@ -119,15 +238,48 @@ if __name__ == "__main__":
                 os.startfile(codePath) 
 
             elif 'search' in query or 'play' in query:
-             
                 query = query.replace("search", "")
-        
-                query = query.replace("play", "")         
+                query = query.replace("play", "")
+                speak("Showing results")         
                 webbrowser.open(webbrowser.open("https://www.google.com/search?q=" + query + ""))
         
             elif 'change background' in query:
                 ctypes.windll.user32.SystemParametersInfoW(20,0,"Location of wallpaper",0)
                 speak("Background changed successfully")
+
+            elif 'empty recycle bin' in query:
+                winshell.recycle_bin().empty(confirm = False, show_progress = False, sound = True)
+                speak("Recycle Bin emptied")
+
+            elif "what is the weather" in query or "how is the weather" in query:
+                         
+                    try:    # Google Open weather website
+                        # to get API of Open weather
+                        query=query.replace("What is the weather of" + "")
+                        query=query.replace("How is the weather of" + "")
+                        api_key = "d3971a59e2d2415e6be8b06e93932f4b"
+                        base_url = "http://api.openweathermap.org / data / 2.5 / weather?"
+                        speak("The weather at" + query)
+                        print("The weather at" + query)
+                        complete_url = base_url + "appid =" + api_key + "&q =" + city_name
+                        response = requests.get(complete_url)
+                        x = response.json()
+                         
+                        if x["code"] != "404":
+                            y = x["main"]
+                            current_temperature = y["temp"]
+                            current_pressure = y["pressure"]
+                            current_humidiy = y["humidity"]
+                            z = x["weather"]
+                            weather_description = z[0]["description"]
+                            print(" Temperature (in kelvin unit) = " +str(current_temperature)+"\n atmospheric pressure (in hPa unit) ="+str(current_pressure) +"\n humidity (in percentage) = " +str(current_humidiy) +"\n description = " +str(weather_description))
+                         
+                        else:
+                            speak(" City Not Found ")
+
+                    except Exception as e:
+                 
+                        print(str(e))    
            
             elif "what's your name" in query or "What is your name" in query:
                 speak("My sir call me")
@@ -151,9 +303,11 @@ if __name__ == "__main__":
                 speak("folder created")
 
             elif "write a note" in query:
+                print("What should I write, sir")
                 speak("What should i write, sir")
                 note = takeCommand()
                 file = open('master.txt', 'w')
+                print("master, Should I include date and time")
                 speak("master, Should i include date and time")
                 snfm = takeCommand()
                 if 'yes' in snfm or 'sure' in snfm:
@@ -193,6 +347,7 @@ if __name__ == "__main__":
                 query = query.replace("where is", "")
                 location = query
                 speak("locating" + query)
+                speak(query + "located")
                 webbrowser.open("https://www.google.com/maps/place/" + location + "")
 
             elif 'open my linkedin profile' in query:
