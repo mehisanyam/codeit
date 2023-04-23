@@ -20,13 +20,14 @@ import requests
 import json
 import openai
 import calendar
+import time
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
 
 engine.setProperty('voice' , voices[1].id)
 
-openai.api_key = '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'
+openai.api_key = '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'
 messages = [ {"role": "system", "content": "You are a intelligent assistant."} ]
 
 def speak(audio):
@@ -47,13 +48,31 @@ def open_calculator():
 
 def sendEmail(to, content):
     server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
+    #server.ehlo()
     server.starttls()
      
     # Enable low security in gmail
-    server.login('your email id', 'your email password')
-    server.sendmail('your email id', to, content)
-    server.close()
+    server.login('sg.22u@btech.nitdgp.ac.in', 'P00j@.s@nj@y')
+    server.sendmail('sg.22u@btech.nitdgp.ac.in', to, content)
+    server.quit()
+
+def takeCommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1.1
+        audio = r.listen(source)
+
+def countdown(t):
+	
+	while t:
+		mins, secs = divmod(t, 60)
+		timer = '{:02d}:{:02d}'.format(mins, secs)
+		print(timer, end="\r")
+		time.sleep(1)
+		t -= 1
+	speak("times up!")
+	print('times up!')
 
 def open_notepad():
     sp.Popen(paths['notepad'])
@@ -85,6 +104,7 @@ if __name__ == "__main__":
     clear()
     wishMe()
     while True:
+        
         r = sr.Recognizer()
         with sr.Microphone() as source:
             print("Listening...")
@@ -97,7 +117,7 @@ if __name__ == "__main__":
             print(f"You said: {query}\n")
             query=query.lower()
         
-            if 'stop now' in query or 'stop it' in query:
+            if 'stop' in query:
                 speak("Okay sir")
                 break
         
@@ -127,11 +147,12 @@ if __name__ == "__main__":
                 speak("cool, opening google")
                 webbrowser.open('https://www.google.com/')
 
-            elif 'email to sanchay' in query:
+            elif 'email to bhai' in query:
                 try:
+                    print("What should I say?")
                     speak("What should I say?")
                     content = takeCommand()
-                    to = "san72.kumar@gmail.com"   
+                    to = "sanchaygupta.72@gmail.com"   
                     sendEmail(to, content)
                     speak("Email has been sent !")
                 except Exception as e:
@@ -179,7 +200,7 @@ if __name__ == "__main__":
                 try:
                     speak("What should I say?")
                     content = takeCommand()
-                    speak("whome should i send")
+                    speak("to whom should i send")
                     to = input()   
                     sendEmail(to, content)
                     speak("Email has been sent !")
@@ -193,8 +214,7 @@ if __name__ == "__main__":
             elif 'show me the calendar of year' in query:
             
                 query = query.replace("show me the calendar of year", "")
-                print (f"The calendar of year {query} is : ")
-                speak('Loading calendar of year')
+                speak('Loading calendar of year' + query)
                 print (calendar.calendar(query))
              
             elif "calculate" in query:
@@ -209,16 +229,17 @@ if __name__ == "__main__":
                 speak("The answer is " + answer)
             
             elif 'chat gpt' in query:
-                
-                speak("connecting you to Open- a i")
                 while True:
-	                if message:
-                        
+	                message = input("User : ")
+	                try:
 		                messages.append({"role": "user", "content": message},)
-		                chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages) 
-	                reply = chat.choices[0].message.content
-	                print(f"ChatGPT: {reply}")
-	                messages.append({"role": "assistant", "content": reply})
+		                chat = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+		                reply = chat.choices[0].message.content
+		                speak(reply)
+		                print(f"ChatGPT: {reply}")
+		                messages.append({"role": "assistant", "content": reply})
+	                except Exception as e:print(e)
+
 
             elif 'lock windows' in query or "lock my pc" in query or "lock the device" in query:
                 speak("locking the device master")
@@ -359,6 +380,12 @@ if __name__ == "__main__":
                 speak("Opening github")
                 webbrowser.open('https://github.com/mehisanyam/codeit')
 
+            elif 'start a timer for'in query:
+                query=query.replace("start a timer for", "")
+                query=query.replace("seconds", "")
+                t = query
+                speak("starting the timer now!")
+                countdown(int(t))
         
             elif 'speak what i write' in query:
                 speak("Okay, go on")
